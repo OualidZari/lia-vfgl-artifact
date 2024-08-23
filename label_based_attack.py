@@ -103,11 +103,8 @@ def compute_performance_metrics(args, inputs, labels, attack_method, indices, **
         cos_sim_upper = predictions
     else:
         inputs = inputs
-        if  args.similarity_metric:
-            print(f'Computing {args.similarity_metric} similarity')
-            cos_sim = pairwise_distances(inputs, metric=args.similarity_metric)
-        else:
-            cos_sim = cosine_similarity(inputs)
+
+        cos_sim = cosine_similarity(inputs)
         cos_sim_upper = cos_sim[np.triu_indices_from(cos_sim, k=1)]
             
     labels_upper = labels[np.triu_indices_from(labels, k=1)]
@@ -133,13 +130,14 @@ def compute_performance_metrics(args, inputs, labels, attack_method, indices, **
         f1_scores_temp = 2 * (tpr * (1 - fpr)) / (tpr + (1 - fpr))
         optimal_threshold = thresholds_temp[f1_scores_temp.argmax()]
         
-        predictions = (cos_sim_upper > optimal_threshold).astype(int)
+        predictions = (cos_sim_upper < optimal_threshold).astype(int)
         accuracy = np.mean(predictions == labels_upper)
         if accuracy < 0.5:
             accuracy = 1 - accuracy
         
         # Compute AUC
         area_under_curve = auc(fpr, tpr)
+
         
         # # Compute other metrics
         # precision = precision_score(labels_upper, predictions)
