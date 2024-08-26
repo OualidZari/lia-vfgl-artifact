@@ -14,11 +14,10 @@ function run_experiment() {
         --architecture ${architecture} \
         --perform_attack_all_methods --attack_all_nodes \
         --attack_methods 'labels,features,gradients,output_server,forward_values' \
-        --use_wandb \
         --local_logging \
-        --experiment_name "Table 4 results Cora before final submission" \
+        --experiment_name "Table 4 results Cora multiple seeds" \
         --attack_epochs [-1] \
-
+        # --use_wandb
         # --gradient_defense \
         # --gradient_defense_noise_level ${gradient_defense_noise_level} \
         
@@ -41,7 +40,7 @@ function run_experiment() {
 export -f run_experiment
 #seeds=(42 12 36)
 # seeds=(42 12 36 15 11 99 04 09 98 10)
-seeds=(42)
+seeds=(42 12 36)
 fraction_data_gcn=(0.5)
 #fraction_data_gcn=(0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1)
 # architectures=('gcn' 'gat' 'sage')
