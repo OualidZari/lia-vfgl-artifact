@@ -15,7 +15,8 @@ function run_experiment() {
         --perform_attack_all_methods --attack_all_nodes \
         --attack_methods 'labels,features,gradients,output_server,forward_values' \
         --use_wandb \
-        --experiment_comment "Table 4 results Cora before final submission" \
+        --local_logging \
+        --experiment_name "Table 4 results Cora before final submission" \
         --attack_epochs [-1] \
 
         # --gradient_defense \

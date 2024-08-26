@@ -54,6 +54,7 @@ def get_training_graph(train_mask, args):
     data.train_mask = torch.Tensor(train_mask)
     data.adj = to_dense_adj(data.edge_index).squeeze()
 
+
     return data, node_index_mapping
 
 

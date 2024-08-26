@@ -6,13 +6,13 @@ from scipy.spatial.distance import pdist, squareform
 import matplotlib.pyplot as plt
 import wandb
 import json
+import os
+import csv
+from datetime import datetime
 
 def perform_attack(args, gradients, data, attack_method, pos_samples, neg_samples, epoch):
     
     gradients = gradients.cpu()
-    # if attack_method == 'cosine':
-    #     pairwise_grad_metric = cosine_similarity(gradients)
-    # if attack_method == 'correlation':
     if args.attack_method == 'cosine':
         pairwise_grad_metric = cosine_similarity(gradients)
     else:
@@ -24,19 +24,18 @@ def perform_attack(args, gradients, data, attack_method, pos_samples, neg_sample
     pos_grad_sim = pairwise_grad_metric[pos_samples[:, 0], pos_samples[:, 1]]
     neg_grad_sim = pairwise_grad_metric[neg_samples[:, 0], neg_samples[:, 1]]
     
-    
     if args.store_scores:
-        run_id = wandb.run.id
-        with open(f'scores_log/{run_id}_epoch_{epoch}_pos.json', 'w') as f:
+        run_id = datetime.now().strftime("%Y%m%d-%H%M%S") if args.local_logging else wandb.run.id
+        log_dir = f"logs/{args.experiment_name}/{run_id}"
+        os.makedirs(log_dir, exist_ok=True)
+        
+        with open(f'{log_dir}/epoch_{epoch}_pos.json', 'w') as f:
             json.dump(pos_grad_sim.tolist(), f)
-        with open(f'scores_log/{run_id}_epoch_{epoch}_neg.json', 'w') as f:
+        with open(f'{log_dir}/epoch_{epoch}_neg.json', 'w') as f:
             json.dump(neg_grad_sim.tolist(), f)
             
     return pos_grad_sim, neg_grad_sim
 
-
-    
-    
 def perfrom_baseline_attack(args, inputs, pos_samples, neg_samples):
     pos_samples = np.array(pos_samples)
     neg_samples = np.array(neg_samples)
@@ -53,25 +52,34 @@ def perfrom_baseline_attack(args, inputs, pos_samples, neg_samples):
     
     return pos_sim, neg_sim    
 
- 
-def calculate_auc(pos_scores, neg_scores, epoch):
+def calculate_auc(args, pos_scores, neg_scores, epoch):
     # Concatenate the positive and negative samples
     labels = np.concatenate([np.ones(len(pos_scores)), np.zeros(len(neg_scores))])
     scores = np.concatenate([pos_scores, neg_scores])
-    
-    #scores = (scores - scores.min() + 1e-16) / (scores.max() - scores.min() + 1e-16)
 
     # Compute the AUC
     auc = roc_auc_score(labels, scores)
-    # if auc < 0.5:
-    #     auc = 1 - auc
     fpr, tpr, thresholds = roc_curve(labels, scores)
-    #wandb.log({"fpr": fpr, "tpr": tpr, "thresholds":thresholds}, step=epoch)
-    wandb.log({"auc": auc}, step=epoch)
+
+    # Local logging
+    if args.local_logging:
+        run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir = f"logs/{args.experiment_name}/{run_id}"
+        os.makedirs(log_dir, exist_ok=True)
+        
+        with open(f'{log_dir}/auc_results.csv', 'a', newline='') as f:
+            writer = csv.writer(f)
+            if f.tell() == 0:  # Write header if file is empty
+                writer.writerow(['epoch', 'metric', 'value'])
+            writer.writerow([epoch, 'auc', auc])
+
+    # Wandb logging (if enabled)
+    if args.use_wandb:
+        wandb.log({"auc": auc}, step=epoch)
 
     return auc, fpr, tpr
 
-def plot_roc_curve(fpr, tpr, auc, dataset_name, epoch):
+def plot_roc_curve(args, fpr, tpr, auc, dataset_name, epoch):
     # Plot the ROC curve
     plt.figure()
     plt.plot(fpr, tpr, label='ROC curve (area = %0.2f)' % auc)
@@ -82,6 +90,16 @@ def plot_roc_curve(fpr, tpr, auc, dataset_name, epoch):
     plt.ylabel('True Positive Rate')
     plt.title(f'{dataset_name}')
     plt.legend(loc="lower right")
-    #plt.savefig(f'{dataset_name}_roc_curve.png')
-    #wandb.log({"roc_curve": wandb.Image(plt)}, step=epoch)
+
+    # Local logging
+    if args.local_logging:
+        run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir = f"logs/{args.experiment_name}/{run_id}"
+        os.makedirs(log_dir, exist_ok=True)
+        plt.savefig(f'{log_dir}/{dataset_name}_roc_curve_epoch_{epoch}.png')
+
+    # Wandb logging (if enabled)
+    if args.use_wandb:
+        wandb.log({"roc_curve": wandb.Image(plt)}, step=epoch)
+
     plt.close()
