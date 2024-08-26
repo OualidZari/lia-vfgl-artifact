@@ -20,6 +20,9 @@ from dp_mechanisms import LapGraph
 from torch_geometric.utils import to_dense_adj, dense_to_sparse
 import json
 import pickle
+import os
+import csv
+from datetime import datetime
 
 
 def main():
@@ -51,6 +54,34 @@ def main():
 
     if args.train_ratio == 1.0:
         test_mask = train_mask
+
+    # Setup logging
+    run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = f"logs/{args.experiment_name}/{run_id}"
+    os.makedirs(log_dir, exist_ok=True)
+
+    # Save config
+    with open(f"{log_dir}/config.json", "w") as f:
+        json.dump(vars(args), f, indent=4)
+
+    # Initialize CSV files for logging
+    csv_files = {
+        "metrics": f"{log_dir}/metrics.csv",
+        "attack_results": f"{log_dir}/attack_results.csv"
+    }
+    for file in csv_files.values():
+        with open(file, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["epoch", "metric", "value"])
+
+    if args.use_wandb:
+        wandb.init(
+            project="Link Inference In FL",
+            config=vars(args),
+            mode="offline"
+        )
+    else:
+        wandb.init(project="Link Inference In FL", config=vars(args), mode="disabled")
 
     if args.multi_party:
         print("Multi-party setup")
@@ -170,15 +201,7 @@ def main():
         )
 
     if args.use_wandb:
-        # wandb.init(project="Link Inference In FL", config=vars(args))
-        wandb.init(
-            project="Link Inference In FL",
-            config=vars(args),
-            mode="offline"
-        )
-    else:
-        wandb.init(project="Link Inference In FL", config=vars(args), mode="disabled")
-    wandb.define_metric("auc", summary="max")
+        wandb.define_metric("auc", summary="max")
 
     if args.store_forward_mlp:
         mlp_forward_list = []
@@ -241,20 +264,29 @@ def main():
         acc_train = int((pred[train_mask] == data_utility.y[train_mask]).sum()) / int(
             train_mask.sum()
         )
-        wandb.log(
-            {
-                "epoch": epoch,
-                "loss": loss.item(),
-                "accuracy_test": acc_test,
-                "accuracy_train": acc_train,
-            },
-            step=epoch,
-        )
-        active_model.train()
+
+        metrics = {
+            "epoch": epoch,
+            "loss": loss.item(),
+            "accuracy_test": acc_test,
+            "accuracy_train": acc_train,
+        }
+
+        # Local logging
+        if args.local_logging:
+            with open(csv_files["metrics"], "a", newline="") as f:
+                writer = csv.writer(f)
+                for metric, value in metrics.items():
+                    writer.writerow([epoch, metric, value])
+
+        # Wandb logging (if enabled)
+        if args.use_wandb:
+            wandb.log(metrics, step=epoch)
 
         if epoch % 10 == 0:
-            print(f"Test Accuracy: {acc_test:.4f}")
-            print(f"Train Accuracy: {acc_train:.4f}")
+            print(f"Epoch {epoch}:")
+            print(f"  Test Accuracy: {acc_test:.4f}")
+            print(f"  Train Accuracy: {acc_train:.4f}")
 
         loss.backward()
 
@@ -300,10 +332,23 @@ def main():
                         ID=wandb.run.id,
                         attack_time=epoch,
                     )
-                    wandb.log(
-                        {f"{k}-{attack_method}": v for k, v in attack_results.items()},
-                        step=epoch,
-                    )
+                    attack_results = {
+                        f"{k}-{attack_method}": v for k, v in attack_results.items()
+                    }
+                    attack_results["epoch"] = epoch
+                    attack_results["attack_method"] = attack_method
+
+                    # Local logging
+                    if args.local_logging:
+                        with open(csv_files["attack_results"], "a", newline="") as f:
+                            writer = csv.writer(f)
+                            for metric, value in attack_results.items():
+                                writer.writerow([epoch, metric, value])
+
+                    # Wandb logging (if enabled)
+                    if args.use_wandb:
+                        wandb.log(attack_results, step=epoch)
+
                     labels_attack_done = True
                 if attack_method == "features" and not features_attack_done:
                     attack_data = process_attack_data_online(
@@ -323,10 +368,23 @@ def main():
                         ID=wandb.run.id,
                         attack_time=epoch,
                     )
-                    wandb.log(
-                        {f"{k}-{attack_method}": v for k, v in attack_results.items()},
-                        step=epoch,
-                    )
+                    attack_results = {
+                        f"{k}-{attack_method}": v for k, v in attack_results.items()
+                    }
+                    attack_results["epoch"] = epoch
+                    attack_results["attack_method"] = attack_method
+
+                    # Local logging
+                    if args.local_logging:
+                        with open(csv_files["attack_results"], "a", newline="") as f:
+                            writer = csv.writer(f)
+                            for metric, value in attack_results.items():
+                                writer.writerow([epoch, metric, value])
+
+                    # Wandb logging (if enabled)
+                    if args.use_wandb:
+                        wandb.log(attack_results, step=epoch)
+
                     features_attack_done = True
                 if attack_method == "gradients":
                     gradients = (
@@ -355,10 +413,23 @@ def main():
                         ID=wandb.run.id,
                         attack_time=epoch,
                     )
-                    wandb.log(
-                        {f"{k}-{attack_method}": v for k, v in attack_results.items()},
-                        step=epoch,
-                    )
+                    attack_results = {
+                        f"{k}-{attack_method}": v for k, v in attack_results.items()
+                    }
+                    attack_results["epoch"] = epoch
+                    attack_results["attack_method"] = attack_method
+
+                    # Local logging
+                    if args.local_logging:
+                        with open(csv_files["attack_results"], "a", newline="") as f:
+                            writer = csv.writer(f)
+                            for metric, value in attack_results.items():
+                                writer.writerow([epoch, metric, value])
+
+                    # Wandb logging (if enabled)
+                    if args.use_wandb:
+                        wandb.log(attack_results, step=epoch)
+
                 if attack_method == "forward_values":
                     forward_values = (
                         mlp_adv_output.clone().detach().cpu()
@@ -382,10 +453,23 @@ def main():
                         ID=wandb.run.id,
                         attack_time=epoch,
                     )
-                    wandb.log(
-                        {f"{k}-{attack_method}": v for k, v in attack_results.items()},
-                        step=epoch,
-                    )
+                    attack_results = {
+                        f"{k}-{attack_method}": v for k, v in attack_results.items()
+                    }
+                    attack_results["epoch"] = epoch
+                    attack_results["attack_method"] = attack_method
+
+                    # Local logging
+                    if args.local_logging:
+                        with open(csv_files["attack_results"], "a", newline="") as f:
+                            writer = csv.writer(f)
+                            for metric, value in attack_results.items():
+                                writer.writerow([epoch, metric, value])
+
+                    # Wandb logging (if enabled)
+                    if args.use_wandb:
+                        wandb.log(attack_results, step=epoch)
+
                 if attack_method == "output_server":
                     output_values = final_output.clone().detach().cpu()
                     attack_data = process_attack_data_online(
@@ -405,10 +489,22 @@ def main():
                         ID=wandb.run.id,
                         attack_time=epoch,
                     )
-                    wandb.log(
-                        {f"{k}-{attack_method}": v for k, v in attack_results.items()},
-                        step=epoch,
-                    )
+                    attack_results = {
+                        f"{k}-{attack_method}": v for k, v in attack_results.items()
+                    }
+                    attack_results["epoch"] = epoch
+                    attack_results["attack_method"] = attack_method
+
+                    # Local logging
+                    if args.local_logging:
+                        with open(csv_files["attack_results"], "a", newline="") as f:
+                            writer = csv.writer(f)
+                            for metric, value in attack_results.items():
+                                writer.writerow([epoch, metric, value])
+
+                    # Wandb logging (if enabled)
+                    if args.use_wandb:
+                        wandb.log(attack_results, step=epoch)
 
         gnn_optimizer.step()
         mlp_adv_optimizer.step() if args.multi_party else mlp_optimizer.step()
@@ -455,18 +551,18 @@ def main():
                     )
                 else:
                     print(f"Index out of bounds: {epoch}")
-            with open(f"scores_log/{wandb.run.id}_gradients.pkl", "wb") as f:
+            with open(f"{log_dir}/gradients.pkl", "wb") as f:
                 pickle.dump(gradients_to_save, f)
-            with open(f"scores_log/{wandb.run.id}_train_mask.pkl", "wb") as f:
+            with open(f"{log_dir}/train_mask.pkl", "wb") as f:
                 pickle.dump(train_mask.tolist(), f)
         else:
             print("Error: attack_epochs is not a valid list of integers.")
 
     if args.store_forward_mlp:
-        with open(f"scores_log/{wandb.run.id}_forward_mlp.pkl", "wb") as f:
+        with open(f"{log_dir}/forward_mlp.pkl", "wb") as f:
             pickle.dump(mlp_forward_list, f)
     if args.store_output_server:
-        with open(f"scores_log/{wandb.run.id}_output_server.pkl", "wb") as f:
+        with open(f"{log_dir}/output_server.pkl", "wb") as f:
             pickle.dump(output_server, f)
 
 
