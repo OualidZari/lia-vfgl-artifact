@@ -1,0 +1,28 @@
+#!/bin/bash
+
+function run_experiment() {
+
+    seed=$1
+    fraction_data_gcn=$2
+    dataset=$3
+    architecture=$4
+
+
+    python main.py --dataset ${dataset} --device cuda --gpu 3 --seed ${seed} --lr 0.01 --epochs 300 --val_ratio 0.02 \
+        --train_ratio 0.5 \
+        --fraction_data_gcn ${fraction_data_gcn} \
+        --architecture ${architecture} \
+        --perform_attack_all_methods --attack_all_nodes \
+        --attack_methods 'labels,features,gradients,output_server,forward_values' \
+        --use_wandb \
+        --experiment_comment "Table 4 results Cora" \
+        --attack_epochs [-1] \
+
+}
+export -f run_experiment
+seeds=(42 12 36 15 11 99 04 09 98 10)
+fraction_data_gcn=(0.5)
+architectures=('gcn')
+datasets=('Cora')
+
+parallel -j 10 run_experiment ::: "${seeds[@]}" ::: "${fraction_data_gcn[@]}" ::: "${datasets[@]}" ::: "${architectures[@]}"

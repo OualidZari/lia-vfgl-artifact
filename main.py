@@ -170,7 +170,12 @@ def main():
         )
 
     if args.use_wandb:
-        wandb.init(project="Link Inference In FL", config=vars(args))
+        # wandb.init(project="Link Inference In FL", config=vars(args))
+        wandb.init(
+            project="Link Inference In FL",
+            config=vars(args),
+            mode="offline"
+        )
     else:
         wandb.init(project="Link Inference In FL", config=vars(args), mode="disabled")
     wandb.define_metric("auc", summary="max")
