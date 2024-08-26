@@ -74,6 +74,4 @@ def get_args():
     parser.add_argument('--use_resnet', action='store_true', help='Use ResNet-like architecture')
     parser.add_argument('--num_res_blocks', type=int, default=2, help='Number of residual blocks')
     parser.add_argument('--hidden_size', type=int, default=64, help='Size of hidden layers')
-    parser.add_argument('--local_logging', action='store_true', help='Enable local logging')
-    parser.add_argument('--experiment_name', type=str, default='default_experiment', help='Name of the experiment for logging')
     return parser.parse_args()
