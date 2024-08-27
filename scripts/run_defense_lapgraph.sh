@@ -28,4 +28,6 @@ fraction_data_gcn=(0.5)
 architectures=('gcn')
 datasets=('Cora')
 epsilons=(1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0)
-parallel -j 10 run_experiment ::: "${seeds[@]}" ::: "${fraction_data_gcn[@]}" ::: "${datasets[@]}" ::: "${architectures[@]}" ::: "${epsilons[@]}"
+num_runs=10
+
+parallel --line-buffer -j ${num_runs} run_experiment ::: "${seeds[@]}" ::: "${fraction_data_gcn[@]}" ::: "${datasets[@]}" ::: "${architectures[@]}" ::: "${epsilons[@]}"

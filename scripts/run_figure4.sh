@@ -25,5 +25,6 @@ seeds=(42 12 36)
 fraction_data_gcn=(0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1)
 architectures=('gcn')
 datasets=('Cora')
+num_runs=10
 
-parallel -j 10 run_experiment ::: "${seeds[@]}" ::: "${fraction_data_gcn[@]}" ::: "${datasets[@]}" ::: "${architectures[@]}"
+parallel --line-buffer -j ${num_runs} run_experiment ::: "${seeds[@]}" ::: "${fraction_data_gcn[@]}" ::: "${datasets[@]}" ::: "${architectures[@]}"

@@ -4,7 +4,6 @@ import torch
 
 from torch_geometric.datasets import Planetoid, Twitch
 import matplotlib.pyplot as plt
-import umap
 import os
 import argparse
 import pandas as pd
@@ -118,8 +117,6 @@ def compute_performance_metrics(args, inputs, labels, attack_method, indices, **
         
     if attack_method == 'labels':
         accuracy = np.mean(cos_sim_upper == labels_upper)
-        # if accuracy < 0.5:
-        #     accuracy = 1 - accuracy
         area_under_curve = None
         precision = precision_score(labels_upper, cos_sim_upper)
         recall = recall_score(labels_upper, cos_sim_upper)
@@ -131,19 +128,11 @@ def compute_performance_metrics(args, inputs, labels, attack_method, indices, **
         f1_scores_temp = 2 * (tpr * (1 - fpr)) / (tpr + (1 - fpr))
         optimal_threshold = thresholds_temp[f1_scores_temp.argmax()]
         
-        predictions = (cos_sim_upper < optimal_threshold).astype(int)
+        predictions = (cos_sim_upper > optimal_threshold).astype(int)
         accuracy = np.mean(predictions == labels_upper)
-        # if accuracy < 0.5:
-        #     accuracy = 1 - accuracy
-        
-        # Compute AUC
+
         area_under_curve = auc(fpr, tpr)
 
-        
-        # # Compute other metrics
-        # precision = precision_score(labels_upper, predictions)
-        # recall = recall_score(labels_upper, predictions)
-        # f1 = f1_score(labels_upper, predictions)
         
     if args.save_predictions:
         np.save(f'predictions/{kwargs["ID"]}_{attack_method}_{kwargs["attack_time"]}_predictions.npy', predictions)
@@ -154,9 +143,6 @@ def compute_performance_metrics(args, inputs, labels, attack_method, indices, **
     return {
         'Accuracy': accuracy,
         'AUC': area_under_curve,
-        # 'Precision': precision,
-        # 'Recall': recall,
-        # 'F1-Score': f1
     }
     
 def get_attacked_nodes(labels, num_positives=None, num_negatives=None):
