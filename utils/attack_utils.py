@@ -44,32 +44,6 @@ def sample_pairs(args, edge_index, train_mask, num_pos_samples=None, num_neg_sam
     return pos_samples, neg_samples
 
 
-
-# def sample_pairs(train_mask, edge_index, num_nodes=None, num_neg_samples=None, num_pos_samples=None):
-#     # If num_nodes is not provided, determine it from the edge_index
-#     train_nodes = np.where(train_mask)[0]
-#     train_edges = edge_index[:, train_mask[edge_index[0]] & train_mask[edge_index[1]]]
-
-#     if num_nodes is None:
-#         num_nodes = edge_index.max().item() + 1  # Nodes are assumed to be 0-indexed
-
-#     # Positive samples
-#     if num_pos_samples is not None:
-#         idx = np.random.choice(edge_index.size(1), num_pos_samples, replace=False)
-#         pos_samples = edge_index[:, idx].t().cpu().numpy().tolist()
-#     else:
-#         pos_samples = edge_index.t().cpu().numpy().tolist()
-
-#     # If num_neg_samples is not provided, use as many negative samples as positive
-#     if num_neg_samples is None:
-#         num_neg_samples = len(pos_samples)
-
-#     # Negative sampling
-#     neg_samples = negative_sampling(edge_index, num_nodes=num_nodes, num_neg_samples=num_neg_samples)
-#     neg_samples = neg_samples.t().cpu().numpy().tolist()
-
-#     return pos_samples, neg_samples
-
 def sample_pairs(args, edge_index, train_mask, num_neg_samples=None, num_pos_samples=None):
     # Convert numpy train_mask to torch tensor and move to GPU
     train_mask = torch.from_numpy(train_mask).to(edge_index.device)
