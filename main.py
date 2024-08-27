@@ -57,7 +57,7 @@ def main():
         test_mask = train_mask
 
     # Setup logging
-    run_id = datetime.now().strftime("%Y%m%d-%H%M%S") + f"_seed_{args.seed}" + str(random.randint(0, 100))
+    run_id = datetime.now().strftime("%Y%m%d-%H%M%S") + f"_seed_{args.seed}_" + str(random.randint(0, 100))
     log_dir = f"logs/{args.experiment_name}/{run_id}"
     os.makedirs(log_dir, exist_ok=True)
 
