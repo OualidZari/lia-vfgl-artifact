@@ -13,7 +13,7 @@ function run_experiment() {
         --fraction_data_gcn ${fraction_data_gcn} \
         --architecture ${architecture} \
         --perform_attack_all_methods --attack_all_nodes \
-        --attack_methods 'gradients,output_server,forward_values' \
+        --attack_methods 'labels,gradients,output_server,forward_values' \
         --local_logging \
         --experiment_name "Defense Label Randomization results Cora" \
         --attack_epochs [-1] \

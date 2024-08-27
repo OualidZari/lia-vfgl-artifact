@@ -118,8 +118,8 @@ def compute_performance_metrics(args, inputs, labels, attack_method, indices, **
         
     if attack_method == 'labels':
         accuracy = np.mean(cos_sim_upper == labels_upper)
-        if accuracy < 0.5:
-            accuracy = 1 - accuracy
+        # if accuracy < 0.5:
+        #     accuracy = 1 - accuracy
         area_under_curve = None
         precision = precision_score(labels_upper, cos_sim_upper)
         recall = recall_score(labels_upper, cos_sim_upper)
@@ -133,8 +133,8 @@ def compute_performance_metrics(args, inputs, labels, attack_method, indices, **
         
         predictions = (cos_sim_upper < optimal_threshold).astype(int)
         accuracy = np.mean(predictions == labels_upper)
-        if accuracy < 0.5:
-            accuracy = 1 - accuracy
+        # if accuracy < 0.5:
+        #     accuracy = 1 - accuracy
         
         # Compute AUC
         area_under_curve = auc(fpr, tpr)
