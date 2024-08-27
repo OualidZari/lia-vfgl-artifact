@@ -38,6 +38,9 @@ source lia_vfgl_env/bin/activate
 # Upgrade pip in the virtual environment
 pip install --upgrade pip
 
+# Install torch first
+pip install torch==1.13.0
+
 # Install requirements
 if [ -f requirements.txt ]; then
     pip install -r requirements.txt

@@ -10,5 +10,5 @@ matplotlib==3.6.2
 wandb==0.13.6
 scikit-learn==1.2.0
 networkx==2.8.4
-umap=0.1.1
+umap==0.1.1
 diffprivlib==0.6.4
