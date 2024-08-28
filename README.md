@@ -21,6 +21,12 @@ To set up the environment and install all required libraries:
    - Wandb 0.13.6
    - Scikit-learn 1.2.0
 
+3. Activate the environment before running any experiments:
+   ```
+   source lia_vfgl_env/bin/activate
+   ```
+   The name of the environment (lia_vfgl_env) should be apparent in your command prompt after activation.
+
 ## Hardware Requirements
 
 Our results were primarily produced using the following setup:
@@ -78,7 +84,7 @@ To reproduce Table 4 and other results from the paper:
 
 The execution time for each experiment varies based on the dataset. These estimates are for 5 parallel runs on our primary hardware setup. Note that each experiment requires multiple runs based on the number of data points needed and the number of seeds. You can reduce the total execution time by lowering the number of seeds.
 
-Estimated execution times per 5 runs:
+Estimated execution times per 5 parallel runs:
 - Cora and Citeseer: 3 minutes
 - Amazon Photo: 22 minutes
 - Amazon Computer: 77 minutes

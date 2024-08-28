@@ -1,0 +1,110 @@
+\section{Defense \label{sec:defense}}
+
+In this section, we evaluate potential defenses against the LIAs introduced earlier. We consider two types of defenses: edge-level perturbation and label perturbation. The edge-level perturbation aims to obscure the graph structure, while the label perturbation addresses the core issue of label leakage. For edge-level perturbation, we use Lapgraph [REF], a method that adds noise to the graph structure. For label perturbation, we develop a novel approach using quadratic optimization to strategically obfuscate labels.
+
+In our vertical federated learning setting, different defense mechanisms can be applied by different parties to protect against adversaries. The edge perturbation defense can be implemented by the victim party (client) that owns the graph structure, while the label perturbation defense should be applied by the server that owns the labels. 
+
+\subsection{Lapgraph}
+
+Lapgraph is a defense mechanism that applies differential privacy at the edge level by perturbing the adjacency matrix of the graph. This approach works by adding Laplace noise to the adjacency matrix, controlled by a privacy parameter $\varepsilon$. After noise addition, Lapgraph employs a binarization process: it selects the largest values in the perturbed adjacency matrix and converts them to one, while setting the rest to zero. The number of selections is determined by a differentially private estimation of the original graph's edge count. This process effectively alters the graph structure by potentially adding fake edges and removing real ones. In our implementation, we vary $\varepsilon$ from 1 to 10 to demonstrate the defense's efficacy across different privacy levels.
+
+Figure \ref{fig:lapgraph_results} shows the results of Lapgraph defense on the Cora dataset.
+
+\begin{figure}[h]
+\centering
+% Insert your figure here
+\caption{Lapgraph defense results on Cora dataset}
+\label{fig:lapgraph_results}
+\end{figure}
+
+From the results, we can see that the Lapgraph defense does not effectively mitigate the attacks' effectiveness, particularly for our introduced gradient-based attack. The gradient-based attack remains highly resilient, showing minimal to no reduction in accuracy across different $\varepsilon$ values. This resilience can be attributed to the fact that the gradient information, which is closely tied to the label information, remains largely unaffected by the graph structure perturbation. For instance, at  $\varepsilon=6$, the gradient-based attack accuracy is 82.24\%, which is even slightly higher than the baseline of 81.71\% without any defense.
+
+The prediction output attack follows a similar pattern to the gradient-based attack, with only a marginal decrease in effectiveness. At $\varepsilon=6$, its accuracy is 80.96\%, compared to the baseline of 80.14\%. Interestingly, the inter-representation attack exhibits an unexpected inverse behavior, showing increased performance as $\varepsilon$ decreases. At $\varepsilon=6$, its accuracy rises to 76.89\% from the baseline of 65.77\%. We speculate that this counterintuitive result occurs because as the graph edges become noisier, the server model pays more attention to the adversary model than to the victim GNN model. This shift leads to the intermediate representations of the adversary model becoming a stronger learner about the labels and features of the nodes, hence increasing the attack's accuracy. This phenomenon aligns with observations in \cite{baseline_relation_leaks}, where perturbation of the victim party's intermediate representations as a defense mechanism inadvertently resulted in strengthening the intermediate representation-based attack of the adversary model.
+
+It is important to note that the label-based attack remains entirely unaffected by this defense. This is because Lapgraph only perturbs the graph structure and does not alter the label information, which is the primary source of information for this attack. The same goes for features-based attacks, as Lapgraph does not modify the node features.
+
+While the defense shows minimal act on the attacks' effectiveness, there is a significant decrease in test accuracy as $\varepsilon$ decreases, indicating a substantial utility loss. At $\varepsilon=6 $, the test accuracy drops to 59.66\% from the baseline of 83.97\%. This underscores the limitation of edge-level perturbation as a defense mechanism against our proposed attacks, which primarily exploit label information leakage rather than graph structural properties.
+
+\subsection{Label Perturbation}
+
+Label perturbation is a defense mechanism that directly addresses the issue of label leakage by strategically obfuscating a portion of the labels. This approach operates with a budget $B$, representing the percentage of labels to be changed. We implement this defense by formulating a quadratic optimization problem to find the optimal class proportions that minimize the attack accuracy derived in our theorem, subject to the budget constraint. The label perturbation defense is implemented in two steps: label proportion optimization (Algorithm \ref{alg:label_proportion_optimization}) and label redistribution (Algorithm \ref{alg:label_redistribution}). These algorithms are described in detail in Section \ref{subsec:label_perturbation_algorithm}.
+
+Figure \ref{fig:label_perturbation_results} illustrates the performance of the label perturbation defense on the Cora dataset for various budget levels.
+
+\begin{figure}[h]
+\centering
+%Insert your figure here
+\caption{Label perturbation defense results on Cora dataset}
+\label{fig:label_perturbation_results}
+\end{figure}
+
+From the results, we observe that the label perturbation defense demonstrates significant effectiveness in mitigating various attacks. As the budget increases from 0.05 to 0.90, we see a substantial decrease in the accuracy of all attacks, albeit at different rates.
+
+The label-based attack is the most affected, with its accuracy dropping from 79.14\% at a 0.05 budget to near-zero (0.14\%) at a 0.90 budget, compared to the baseline of 81.74\% without defense. This dramatic reduction is expected as the defense directly targets the label information that this attack relies on.
+
+The gradient-based attack also shows a significant decrease in accuracy, from 79.03\% at a 0.05 budget to 58.93\% at a 0.90 budget, a substantial reduction from the baseline of 81.71\%. This substantial reduction reflects the strong correlation between gradient information and labels.
+
+The prediction output attack and inter-representation attack show more resilience to the label perturbation defense. The prediction output attack's accuracy decreases from 77.41\% to 64.18\%, while the inter-representation attack's accuracy drops from 66.77\% to 51.90\% as the budget increases from 0.05 to 0.90. These are still significant reductions from their baselines of 80.14\% and 65.77\% respectively.
+
+Comparing these results to Lapgraph at points where the utility (test accuracy) is similar, we see that label perturbation tends to be more effective. For instance, at a budget of 0.30, label perturbation achieves a test accuracy of 59.12\%, which is comparable to Lapgraph's 59.66\% at $\varepsilon=6$. At these points, the gradient-based attack accuracy is 63.14\% for label perturbation, compared to 82.24\% for Lapgraph. Similarly, the inter-representation attack accuracy is 57.21\% for label perturbation, but 76.89\% for Lapgraph.
+
+The label perturbation defense does impact the system's utility, with the test accuracy decreasing from 73.87\% at a 0.05 budget to 29.79\% at a 0.90 budget, compared to the baseline of 83.97\%. However, this trade-off appears more favorable compared to Lapgraph, especially at lower privacy levels where the utility loss is less severe.
+
+These results suggest that addressing the fundamental issue of label leakage through targeted perturbation is generally more effective than graph structure alterations in defending against our proposed attacks, particularly when considering the privacy-utility trade-off.
+
+\subsection{Discussion}
+
+Comparing the two defenses, we find that Lapgraph is largely ineffective against our attacks and significantly impacts system utility. In contrast, label perturbation provides better protection against all types of attacks, offering a more favorable privacy-utility trade-off.
+
+The label perturbation defense is particularly effective against the label-based and gradient-based attacks, which are the most potent in our original attack scenario. It also provides substantial protection against prediction output and inter-representation attacks, albeit to a lesser degree.
+
+In conclusion, our results suggest that addressing the fundamental issue of label leakage through targeted perturbation is more effective than graph structure alterations. The label perturbation defense emerges as the superior approach, providing better protection against various attacks while preserving system utility more effectively than Lapgraph. Future work could explore combining these approaches or developing more sophisticated label perturbation strategies to further optimize the privacy-utility trade-off in GNN systems, particularly focusing on improving defense against prediction output and inter-representation attacks.
+
+\subsection{Label Perturbation Algorithm \label{subsec:label_perturbation_algorithm}}
+
+We present the label perturbation defense algorithm in two parts: optimization and redistribution.
+
+\begin{algorithm}
+\caption{Label Proportion Optimization}
+\label{alg:label_proportion_optimization}
+\begin{algorithmic}[1]
+\Require Initial label proportions $\alpha_c^{init}$, budget $B$
+\Ensure Optimized label proportions $\alpha_c^*$
+\State Solve the following optimization problem:
+\State $\max_{\alpha_c} \sum_{c=1}^C \alpha_c^2$
+\State subject to:
+\State $\quad \sum_{c=1}^C \alpha_c = 1$
+\State $\quad \sum_{c=1}^C \max(0, \alpha_c^{init} - \alpha_c) \leq B$
+\State $\quad \alpha_c \geq 0, \forall c \in \{1, \ldots, C\}$
+\State \Return $\alpha_c^*$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Label Redistribution}
+\label{alg:label_redistribution}
+\begin{algorithmic}[1]
+\Require Current labels $y$, optimized proportions $\alpha_c^*$
+\Ensure obfuscated labels $y'$
+\State $N \gets |y|$
+\State $n_c^* \gets \lfloor N \alpha_c^* \rfloor, \forall c \in \{1, \ldots, C\}$
+\State Adjust $n_c^*$ to ensure $\sum_{c=1}^C n_c^* = N$
+\State $\Delta_c \gets n_c^* - |\{i : y_i = c\}|, \forall c \in \{1, \ldots, C\}$
+\State $C^+ \gets \{c : \Delta_c > 0\}$, sorted by descending $\Delta_c$
+\State $C^- \gets \{c : \Delta_c < 0\}$
+\For{$c_t \in C^+$}
+    \For{$c_s \in C^-$}
+        \State $n_{flip} \gets \min(\Delta_{c_t}, -\Delta_{c_s})$
+        \State Randomly select $n_{flip}$ nodes with label $c_s$
+        \State Change their labels to $c_t$
+        \State Update $\Delta_{c_t}$ and $\Delta_{c_s}$
+        \If{$\Delta_{c_t} = 0$}
+            \State \textbf{break}
+        \EndIf
+    \EndFor
+\EndFor
+\State \Return $y'$
+\end{algorithmic}
+\end{algorithm}
+
+This algorithm optimizes label proportions to maximize $\sum_{c=1}^C \alpha_c^2$ within the given budget $B$, then redistributes labels to match these optimized proportions. The optimization step uses quadratic programming, while the redistribution step iteratively balances labels between classes.
