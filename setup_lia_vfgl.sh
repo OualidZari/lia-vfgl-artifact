@@ -48,6 +48,10 @@ else
     echo "requirements.txt not found. Skipping package installation."
 fi
 
+# Download datasets
+echo "Downloading datasets..."
+python download_datasets.py
+
 echo "Environment setup complete. You can activate it with 'source lia_vfgl_env/bin/activate'"
 
 # Deactivate the environment
