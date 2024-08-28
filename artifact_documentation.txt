@@ -26,23 +26,25 @@ This document provides detailed instructions for reproducing the main results of
 \item Results of the defense mechanisms introduced in Section 6, including LapGraph and Label Perturbation
 \end{itemize}
 
-
 This documentation is structured as follows:
 \begin{itemize}
+
 \item Section 2 outlines the repository structure and provides a comprehensive file directory
-\item Section 3 provides step-by-step guidelines to reproduce results, including:
+\item Section 3 covers requirements and setup instructions
+\item Section 4 describes hardware requirements for running the experiments
+\item Section 5 provides step-by-step guidelines to reproduce results, including:
   \begin{itemize}
-  \item Requirements and setup instructions
   \item Detailed steps to run experiments
   \item A recommended workflow for result reproduction
+  \item Instructions for reproducing specific results (e.g., Table 4)
   \end{itemize}
-\item Section 4 offers additional information about hardware requirements and execution time estimates
-\item Section 5 describes supplementary materials and alternative workflows
+\item Section 6 provides execution time estimates for different datasets
+\item Section 7 offers supplementary materials and alternative workflows
 \end{itemize}
 
 By following this documentation, you will be able to replicate our experimental setup, run the necessary scripts, and generate the key results and figures presented in our paper.
 
-\section{File Directory}
+\section{Repository Structure and File Directory}
 \begin{longtable}{p{0.45\textwidth}p{0.55\textwidth}}
 \toprule
 File/Directory Name & Description \\
@@ -83,9 +85,36 @@ File/Directory Name & Description \\
 \bottomrule
 \end{longtable}
 
+\section{Requirements and Setup}
+To set up the environment and install all required libraries:
 
-\subsection{Hardware Requirements}
-Our primary setup used:
+\begin{enumerate}
+\item Run the \texttt{setup\_lia\_vfgl.sh} script:
+\begin{verbatim}
+./setup_lia_vfgl.sh
+\end{verbatim}
+This script will install the necessary environment with all required libraries and download all datasets used in the paper.
+
+\item The main requirements are listed in \texttt{requirements.txt}, including:
+\begin{itemize}
+\item PyTorch 1.13.0
+\item PyTorch Geometric 2.2.0
+\item NumPy 1.23.5
+\item Pandas 1.5.2
+\item Matplotlib 3.6.2
+\item Wandb 0.13.6
+\item Scikit-learn 1.2.0
+\end{itemize}
+
+\item Activate the environment before running any experiments:
+\begin{verbatim}
+source lia_vfgl_env/bin/activate
+\end{verbatim}
+The name of the environment (lia\_vfgl\_env) should be apparent in your command prompt after activation.
+\end{enumerate}
+
+\section{Hardware Requirements}
+Our results were primarily produced using the following setup:
 \begin{itemize}
 \item 4x NVIDIA GeForce RTX 3090 GPUs (24GB VRAM each)
 \item AMD EPYC 7272 12-Core Processor
@@ -93,12 +122,45 @@ Our primary setup used:
 \item Ubuntu 20.04.6 LTS with Linux kernel 5.4.0-177-generic
 \end{itemize}
 
-However, experiments for Table 4, which include the Cora dataset, can run on smaller setups without a GPU. We have successfully run our code for the Table 4 experiments on the "Compute VM" of Artifacts submission platform, which has a 16 core CPU, 64GB memory, and Ubuntu 22.04. This setup is sufficient for reproducing the results presented in Table 4 of our paper for Cora dataset.
+We have also successfully tested the Table 4 experiment for the Cora dataset on the Artifacts submission platform's Compute VM, which features a 16-core CPU, 64GB memory, and runs Ubuntu 22.04.
 
+Note: The Cora dataset experiments do not require a GPU and can be run in a reasonable time on the smaller setup.
 
+\section{Reproducing Results}
+To reproduce the results of the paper, follow these steps:
 
+\subsection{Detailed Steps to Run Experiments}
+\begin{enumerate}
+\item Navigate to the \texttt{scripts} directory.
+\item Run the appropriate script for each experiment. Each script is associated with a specific experiment and will log results in the \texttt{log} directory.
+\item After the script execution is complete, use one of the following methods to parse logs and produce final tables and graphs:
+  \begin{itemize}
+  \item Use the corresponding Jupyter notebook in the \texttt{reproduced-results} directory.
+  \item Run the associated Python script in the same directory.
+  \end{itemize}
+\end{enumerate}
 
-\subsection{Execution Time Estimation}
+\subsection{Recommended Workflow}
+\begin{enumerate}
+\item Go to the \texttt{reproduced-results} directory.
+\item Read the \texttt{.ipynb} file associated with the experiment you want to reproduce.
+\item Follow the detailed instructions in the notebook on how to run the corresponding script.
+\item After the script has finished executing, choose one of these options:
+  \begin{itemize}
+  \item Run the cells in the Jupyter notebook to generate the final results.
+  \item Execute the corresponding \texttt{.py} script to parse logs and save tables and figures.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Reproducing Table 4 and Other Results}
+To reproduce Table 4 and other results from the paper:
+\begin{enumerate}
+\item Locate the corresponding script at \texttt{scripts/run\_table4.sh}.
+\item Run the script following the instructions in the associated Jupyter notebook \texttt{reproduced\_results/table4.ipynb}.
+\item Once the script has finished executing, open the Jupyter notebook and run its cells to generate the final results.
+\end{enumerate}
+
+\section{Execution Time Estimation}
 Estimated time for reproduction varies by dataset and experiment. These estimates are for 5 parallel runs on our primary hardware setup:
 
 \begin{itemize}
@@ -112,12 +174,9 @@ Estimated time for reproduction varies by dataset and experiment. These estimate
 
 Note that each experiment requires multiple runs based on the number of data points needed and the number of seeds. You can reduce the total execution time by lowering the number of seeds in the corresponding script files.
 
-\section{Supplementary Materials}
-\begin{itemize}
-\item \texttt{download\_datasets.py}: Script to download all datasets used in the paper.
-\item Jupyter notebooks in \texttt{reproduced-results/}: Provide an interactive way to parse logs and produce final results for each experiment.
-\item Python scripts in \texttt{reproduced-results/}: Offer an alternative to Jupyter notebooks for parsing logs and generating results.
-\item \texttt{README.md}: Contains additional details about the project structure, requirements, and reproduction steps.
-\end{itemize}
+\section{Supplementary Materials and Alternative Workflows}
+For detailed instructions on running each experiment, please refer to the corresponding Jupyter notebooks in the \texttt{reproduced\_results} directory.
+
+If you prefer not to work with notebooks, each \texttt{.ipynb} file in the \texttt{reproduce\_results} directory has a corresponding \texttt{.py} script. These scripts parse the logs and save the tables and figures directly in the directory, providing an alternative to using the notebooks.
 
 \end{document}
