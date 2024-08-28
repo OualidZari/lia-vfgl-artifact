@@ -15,7 +15,7 @@ function run_experiment() {
         --perform_attack_all_methods --attack_all_nodes \
         --attack_methods 'gradients,output_server,forward_values' \
         --local_logging \
-        --experiment_name "Defense Lapgraph results comp test" \
+        --experiment_name "Defense Lapgraph results Cora" \
         --attack_epochs [-1] \
         --lapgraph \
         --epsilon ${epsilon}
