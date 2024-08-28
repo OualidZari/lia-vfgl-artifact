@@ -49,14 +49,18 @@ To reproduce the results of the paper, follow these steps:
 
 1. Navigate to the `scripts` directory.
 2. Run the appropriate script for each experiment. Each script is associated with a specific experiment and will log results in the `log` directory.
-3. After the script execution is complete, use the corresponding Jupyter notebook in the `reproduced-results` directory to parse the logs and produce the final tables and graphs.
+3. After the script execution is complete, use one of the following methods to parse logs and produce final tables and graphs:
+   a. Use the corresponding Jupyter notebook in the `reproduced-results` directory.
+   b. Run the associated Python script in the same directory.
 
 ### Recommended Workflow
 
 1. Go to the `reproduced-results` directory.
 2. Read the `.ipynb` file associated with the experiment you want to reproduce.
 3. Follow the detailed instructions in the notebook on how to run the corresponding script.
-4. After the script has finished executing, run the cells in the Jupyter notebook to generate the final results.
+4. After the script has finished executing, choose one of these options:
+   - Run the cells in the Jupyter notebook to generate the final results.
+   - Execute the corresponding `.py` script to parse logs and save tables and figures.
 
 ## Experiments
 
@@ -78,7 +82,7 @@ To reproduce Table 4 and other results from the paper:
 
 - `scripts/`: Contains the scripts for running each experiment.
 - `log/`: Directory where experiment logs are stored.
-- `reproduced-results/`: Contains Jupyter notebooks for parsing logs and producing final results.
+- `reproduced-results/`: Contains Jupyter notebooks and Python scripts for parsing logs and producing final results.
 
 ## Execution Time Estimation
 
@@ -95,3 +99,5 @@ Estimated execution times per 5 parallel runs:
 ## Detailed Instructions
 
 For detailed instructions on running each experiment, please refer to the corresponding Jupyter notebook in the `reproduced-results` directory.
+
+If you prefer not to work with notebooks, each `.ipynb` file in the `reproduced-results` directory has a corresponding `.py` script. These scripts parse the logs and save the tables and figures directly in the directory, providing an alternative to using the notebooks.

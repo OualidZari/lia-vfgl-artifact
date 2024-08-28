@@ -1,0 +1,81 @@
+\documentclass{article}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{longtable}
+
+\title{Artifact Documentation}
+\author{Link Inference Attack in Vertical Federated Graph Learning}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This document provides detailed instructions for reproducing the main results of the paper "Link Inference Attack in Vertical Federated Graph Learning". The artifacts are hosted on \href{https://osf.io/link-to-artifacts}{OSF} and include all necessary code, datasets, and scripts to replicate our experiments. This documentation is structured as follows: Section 2 outlines the file directory, Section 3 provides step-by-step guidelines to reproduce results, Section 4 offers additional information, and Section 5 describes supplementary materials.
+
+\section{File Directory}
+\begin{longtable}{p{0.3\textwidth}p{0.7\textwidth}}
+\toprule
+File/Directory Name & Description \\
+\midrule
+\texttt{setup\_lia\_vfgl.sh} & Shell script for setting up the environment and installing required libraries \\
+\texttt{requirements.txt} & List of required Python libraries and their versions \\
+\texttt{scripts/} & Directory containing experiment scripts \\
+\texttt{scripts/run\_figure4.sh} & Script to reproduce Figure 4 results \\
+\texttt{log/} & Directory where experiment logs are stored \\
+\texttt{reproduced-results/} & Directory containing Jupyter notebooks and Python scripts for parsing logs and producing final results \\
+\texttt{reproduced-results/figure4.py} & Python script to generate Figure 4 from log data \\
+\texttt{download\_datasets.py} & Script to download required datasets \\
+\bottomrule
+\end{longtable}
+
+\section{Guideline to Reproduce Results}
+Estimated time for reproduction varies by dataset:
+\begin{itemize}
+\item Cora and Citeseer: 3 minutes
+\item Amazon Photo: 22 minutes
+\item Amazon Computer: 77 minutes
+\item Twitch FR: 30 minutes
+\item Twitch DE: 55 minutes
+\item Twitch EN: 30 minutes
+\end{itemize}
+
+These estimates are for 5 parallel runs on our primary hardware setup.
+
+\subsection{Step-by-step instructions}
+\begin{enumerate}
+\item Access and download artifacts from the \href{https://osf.io/link-to-artifacts}{OSF repository}.
+
+\item Set up the environment:
+   \begin{verbatim}
+   ./setup_lia_vfgl.sh
+   source lia_vfgl_env/bin/activate
+   \end{verbatim}
+
+\item To reproduce Figure 4 results:
+   \begin{verbatim}
+   cd scripts
+   ./run_figure4.sh
+   \end{verbatim}
+
+\item Generate the figure:
+   \begin{verbatim}
+   cd ../reproduced-results
+   python figure4.py
+   \end{verbatim}
+
+\item The output figure will be saved as \texttt{feature\_ratio\_comparison\_cora.pdf} in the \texttt{reproduced-results} directory.
+\end{enumerate}
+
+\section{Additional Information}
+For questions or issues, please contact [Your Contact Information].
+
+\textbf{Hardware Requirements:} Our primary setup used 4x NVIDIA GeForce RTX 3090 GPUs, AMD EPYC 7272 12-Core Processor, 125GB RAM, and Ubuntu 20.04.6 LTS. However, Cora dataset experiments can run on smaller setups without a GPU.
+
+\section{Supplementary Materials}
+\begin{itemize}
+\item \texttt{download\_datasets.py}: Script to download all datasets used in the paper.
+\item Jupyter notebooks in \texttt{reproduced-results/}: Provide an interactive way to parse logs and produce final results for each experiment.
+\end{itemize}
+
+\end{document}

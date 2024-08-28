@@ -118,7 +118,7 @@ def get_attacked_nodes_data(features_mlp, train_mask, args):
     dataset, data, _, _, _ = load_data(args)
     edge_index_np = data.edge_index.cpu().numpy()
     indices = np.arange(data.num_nodes)
-    # insert here sampling strategies
+
     if args.label_defense:
         new_labels = labels_defense(data.y, args.label_defense_budget)
         data.y = new_labels
@@ -144,7 +144,5 @@ def get_attacked_nodes_data(features_mlp, train_mask, args):
     data.adj = adj_attacked
     data.edge_index = edge_index_attacked
     adj = adj_attacked
-    # print('number of attacked nodes: ', len(attacked_nodes))
-    # print('number of attacked edges', adj.sum().item() / 2)
-    # print('number of attacked non-edges', (adj.shape[0] * (adj.shape[0]-1) / 2) - adj.sum().item() / 2)
+
     return data, node_index_mapping

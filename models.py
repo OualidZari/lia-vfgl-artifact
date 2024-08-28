@@ -1,5 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
+from torch_geometric.nn import GCNConv, GATConv, SAGEConv
+import torch
+
 
 class MLPModel(nn.Module):
     def __init__(self, args, input_size, hidden_size, output_size):
@@ -27,9 +30,6 @@ class MLPModel(nn.Module):
         return x
     
 
-import torch
-import torch.nn.functional as F
-from torch_geometric.nn import GCNConv, GATConv, SAGEConv
 
 class GCN(torch.nn.Module):
     def __init__(self, args, input_size, output_size):
@@ -88,31 +88,6 @@ class SAGE(torch.nn.Module):
         return x
 
 
-
-import torch.nn as nn
-import torch.nn.functional as F
-
-# class ActiveModel(nn.Module):
-#     def __init__(self, args, input_size, output_size):
-#         super(ActiveModel, self).__init__()
-#         self.fc1 = nn.Linear(input_size, input_size)
-#         self.fc2 = nn.Linear(input_size, output_size)
-#         self.args = args
-#         #self.layer = MLPModel(input_size, input_size, output_size)
-#         if args.initialize:
-#             weight_init_factor = args.weight_init_factor
-#             self.fc1.weight.data.fill_(1) * weight_init_factor
-#             self.fc2.weight.data.fill_(1) * weight_init_factor
-#             self.fc1.bias.data.fill_(0)
-#             self.fc2.bias.data.fill_(0)
-
-#     def forward(self, x):
-#         x = F.relu(self.fc1(x))
-#         x = self.fc2(x)
-#         x = F.log_softmax(x, dim=1)
-#         return x
-    
-    
 class ActiveModel(nn.Module):
     def __init__(self, args, input_size, output_size):
         super(ActiveModel, self).__init__()
