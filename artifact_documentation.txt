@@ -3,34 +3,104 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 
-\title{Artifact Documentation}
-\author{Link Inference Attack in Vertical Federated Graph Learning}
+\title{Artifact Documentation:\\
+Link Inference Attacks in Vertical Federated Graph Learning\\
+\\
+\\
+\large Submission Number: 342}
 
 \begin{document}
 
 \maketitle
 
+\section*{Acknowledgment}
+We sincerely thank the artifact reviewers for choosing our paper for evaluation. Your time and effort in assessing our work are greatly appreciated.
+
 \section{Introduction}
-This document provides detailed instructions for reproducing the main results of the paper "Link Inference Attack in Vertical Federated Graph Learning". The artifacts are hosted on \href{https://osf.io/link-to-artifacts}{OSF} and include all necessary code, datasets, and scripts to replicate our experiments. This documentation is structured as follows: Section 2 outlines the file directory, Section 3 provides step-by-step guidelines to reproduce results, Section 4 offers additional information, and Section 5 describes supplementary materials.
+This document provides detailed instructions for reproducing the main results of the paper "Link Inference Attacks in Vertical Federated Graph Learning" (submission number 342). The artifacts are hosted on \href{https://github.com/username/link-inference-attack}{GitHub} and include all necessary code, datasets, and scripts to replicate our experiments. These artifacts specifically reproduce the following key results from our paper:
+
+\begin{itemize}
+\item Table 4: Accuracy of link inference attacks across datasets using GCN architecture
+\item Figure 3: Impact of the number of training epochs on attack performance
+\item Figure 4: Comparison of AUC between Gradient-based LIA, Intermediate Representations-based LIA, and Feature-based LIA across different feature ratios of the adversary
+\item Results of the defense mechanisms introduced in Section 6, including LapGraph and Label Perturbation
+\end{itemize}
+
+
+This documentation is structured as follows:
+\begin{itemize}
+\item Section 2 outlines the repository structure and provides a comprehensive file directory
+\item Section 3 provides step-by-step guidelines to reproduce results, including:
+  \begin{itemize}
+  \item Requirements and setup instructions
+  \item Detailed steps to run experiments
+  \item A recommended workflow for result reproduction
+  \end{itemize}
+\item Section 4 offers additional information about hardware requirements and execution time estimates
+\item Section 5 describes supplementary materials and alternative workflows
+\end{itemize}
+
+By following this documentation, you will be able to replicate our experimental setup, run the necessary scripts, and generate the key results and figures presented in our paper.
 
 \section{File Directory}
-\begin{longtable}{p{0.3\textwidth}p{0.7\textwidth}}
+\begin{longtable}{p{0.45\textwidth}p{0.55\textwidth}}
 \toprule
 File/Directory Name & Description \\
 \midrule
 \texttt{setup\_lia\_vfgl.sh} & Shell script for setting up the environment and installing required libraries \\
 \texttt{requirements.txt} & List of required Python libraries and their versions \\
+\texttt{datasets/} & Directory containing datasets used in experiments, downloaded upon environment installation \\
+\texttt{defense/} & Directory containing implemented defenses from our paper \\
+\texttt{defense/lapgraph.py} & LapGraph defense introduced in Section 6.1 of the revised paper \\
+\texttt{defense/} & \\
+\texttt{label\_defense.py} & Label perturbation defense introduced in Section 6.2 of the revised paper \\
+\texttt{utils/} & Directory containing utility functions such as argument parser and dataset loaders \\
+\texttt{attack.py} & Implementation of the introduced attacks \\
+\texttt{label\_based\_attack.py} & Implementation of the label-based attack \\
+\texttt{main.py} & Main function that runs all experiments \\
+\texttt{models.py} & Implementation of the ML models used in the paper \\
+\texttt{download\_datasets.py} & Script to download datasets, included in the environment setup script. Can be used to download datasets without creating the environment \\
 \texttt{scripts/} & Directory containing experiment scripts \\
+\texttt{scripts/run\_figure3.sh} & Script to reproduce Figure 3 results \\
 \texttt{scripts/run\_figure4.sh} & Script to reproduce Figure 4 results \\
+\texttt{scripts/run\_table4.sh} & Script to reproduce Table 4 results \\
+\texttt{scripts/} & \\
+\texttt{run\_defense\_label\_rand.sh} & Script to reproduce Label Perturbation defense results \\
+\texttt{scripts/} & \\
+\texttt{run\_defense\_lapgraph.sh} & Script to reproduce LapGraph defense results \\
 \texttt{log/} & Directory where experiment logs are stored \\
-\texttt{reproduced-results/} & Directory containing Jupyter notebooks and Python scripts for parsing logs and producing final results \\
-\texttt{reproduced-results/figure4.py} & Python script to generate Figure 4 from log data \\
-\texttt{download\_datasets.py} & Script to download required datasets \\
+\texttt{reproduced\_results/} & Directory containing Jupyter notebooks and Python scripts for parsing logs and producing final results \\
+\texttt{reproduced\_results/} & \\
+\texttt{figure3.py} & Python script to generate Figure 3 from log data \\
+\texttt{reproduced\_results/} & \\
+\texttt{figure4.py} & Python script to generate Figure 4 from log data \\
+\texttt{reproduced\_results/} & \\
+\texttt{table4.py} & Python script to generate Table 4 from log data \\
+\texttt{reproduced\_results/} & \\
+\texttt{label\_rand\_defense.py} & Python script to generate Label Randomization defense results \\
+\texttt{reproduced\_results/} & \\
+\texttt{lapgraph\_defense.py} & Python script to generate LapGraph defense results \\
 \bottomrule
 \end{longtable}
 
-\section{Guideline to Reproduce Results}
-Estimated time for reproduction varies by dataset:
+
+\subsection{Hardware Requirements}
+Our primary setup used:
+\begin{itemize}
+\item 4x NVIDIA GeForce RTX 3090 GPUs (24GB VRAM each)
+\item AMD EPYC 7272 12-Core Processor
+\item 125GB RAM
+\item Ubuntu 20.04.6 LTS with Linux kernel 5.4.0-177-generic
+\end{itemize}
+
+However, experiments for Table 4, which include the Cora dataset, can run on smaller setups without a GPU. We have successfully run our code for the Table 4 experiments on the "Compute VM" of Artifacts submission platform, which has a 16 core CPU, 64GB memory, and Ubuntu 22.04. This setup is sufficient for reproducing the results presented in Table 4 of our paper for Cora dataset.
+
+
+
+
+\subsection{Execution Time Estimation}
+Estimated time for reproduction varies by dataset and experiment. These estimates are for 5 parallel runs on our primary hardware setup:
+
 \begin{itemize}
 \item Cora and Citeseer: 3 minutes
 \item Amazon Photo: 22 minutes
@@ -40,42 +110,14 @@ Estimated time for reproduction varies by dataset:
 \item Twitch EN: 30 minutes
 \end{itemize}
 
-These estimates are for 5 parallel runs on our primary hardware setup.
-
-\subsection{Step-by-step instructions}
-\begin{enumerate}
-\item Access and download artifacts from the \href{https://osf.io/link-to-artifacts}{OSF repository}.
-
-\item Set up the environment:
-   \begin{verbatim}
-   ./setup_lia_vfgl.sh
-   source lia_vfgl_env/bin/activate
-   \end{verbatim}
-
-\item To reproduce Figure 4 results:
-   \begin{verbatim}
-   cd scripts
-   ./run_figure4.sh
-   \end{verbatim}
-
-\item Generate the figure:
-   \begin{verbatim}
-   cd ../reproduced-results
-   python figure4.py
-   \end{verbatim}
-
-\item The output figure will be saved as \texttt{feature\_ratio\_comparison\_cora.pdf} in the \texttt{reproduced-results} directory.
-\end{enumerate}
-
-\section{Additional Information}
-For questions or issues, please contact [Your Contact Information].
-
-\textbf{Hardware Requirements:} Our primary setup used 4x NVIDIA GeForce RTX 3090 GPUs, AMD EPYC 7272 12-Core Processor, 125GB RAM, and Ubuntu 20.04.6 LTS. However, Cora dataset experiments can run on smaller setups without a GPU.
+Note that each experiment requires multiple runs based on the number of data points needed and the number of seeds. You can reduce the total execution time by lowering the number of seeds in the corresponding script files.
 
 \section{Supplementary Materials}
 \begin{itemize}
 \item \texttt{download\_datasets.py}: Script to download all datasets used in the paper.
 \item Jupyter notebooks in \texttt{reproduced-results/}: Provide an interactive way to parse logs and produce final results for each experiment.
+\item Python scripts in \texttt{reproduced-results/}: Offer an alternative to Jupyter notebooks for parsing logs and generating results.
+\item \texttt{README.md}: Contains additional details about the project structure, requirements, and reproduction steps.
 \end{itemize}
 
 \end{document}
