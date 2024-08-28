@@ -1,14 +1,13 @@
 import random
 from defense.label_defense import labels_defense
+from defense.lapgraph import LapGraph
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch_geometric.nn import GCNConv
-from torch_geometric.datasets import Planetoid, TUDataset, Twitch
-from sklearn.metrics.pairwise import cosine_similarity
+
 import wandb
 from models import MLPModel, ActiveModel, GCN, GAT, SAGE
-from utils import get_args, load_data, split_indices, set_seed
+from utils import get_args, load_data, set_seed
 from utils.data_loader import (
     get_training_graph,
     process_attack_data_online,
@@ -17,7 +16,6 @@ from utils.data_loader import (
 from attack import *
 from tqdm import tqdm
 from label_based_attack import compute_performance_metrics
-from dp_mechanisms import LapGraph
 from torch_geometric.utils import to_dense_adj, dense_to_sparse
 import json
 import pickle

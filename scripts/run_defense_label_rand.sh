@@ -15,7 +15,7 @@ function run_experiment() {
         --perform_attack_all_methods --attack_all_nodes \
         --attack_methods 'labels,gradients,output_server,forward_values' \
         --local_logging \
-        --experiment_name "Defense Label Randomization results Citeseer" \
+        --experiment_name "Defense Label Randomization results Cora" \
         --attack_epochs [-1] \
         --label_defense \
         --label_defense_budget ${label_defense_budget}
