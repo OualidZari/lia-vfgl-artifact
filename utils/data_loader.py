@@ -119,7 +119,7 @@ def get_attacked_nodes_data(features_mlp, train_mask, args):
     edge_index_np = data.edge_index.cpu().numpy()
     indices = np.arange(data.num_nodes)
 
-    if args.label_defense:
+    if args.label_defense and args.label_defense_budget > 0:
         new_labels = labels_defense(data.y, args.label_defense_budget)
         data.y = new_labels
     if args.sampling_strategy == 'all_nodes':

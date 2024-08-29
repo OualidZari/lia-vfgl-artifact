@@ -35,7 +35,7 @@ def main():
     )
     dataset, data, train_mask, val_mask, test_mask = load_data(args)
     _, data_utility, _, _, _ = load_data(args)
-    if args.label_defense:
+    if args.label_defense and args.label_defense_budget > 0:
         new_labels = labels_defense(data.y, args.label_defense_budget)
         data.y = new_labels
 

@@ -1,0 +1,7 @@
+\begin{abstract}
+This artifact provides the implementation and evaluation code for Link Inference Attacks (LIAs) against Vertical Federated Graph Learning (VFGL) systems, as presented in our paper. It includes implementations of our gradient-based attack and state-of-the-art methods for comparison. The code simulates VFGL scenarios with different client model architectures, including Deep Neural Networks (DNNs) and Graph Neural Networks (GNNs).
+
+We provide seven real-world datasets for evaluation across diverse graph structures, along with scripts for reproducing key results from our paper. The artifact also includes analysis tools for examining information leakage in gradients and intermediate representations. Additionally, we implement the defense mechanisms proposed in our paper, allowing researchers to evaluate their effectiveness against LIAs.
+
+Our code supports both GPU-accelerated and CPU-only execution to accommodate different hardware setups. This artifact enables researchers to reproduce our results, conduct additional experiments on VFGL system vulnerabilities, and develop new defense mechanisms against LIAs. By providing this comprehensive codebase, we aim to facilitate further research in privacy preservation for federated learning on graph-structured data.
+\end{abstract}
