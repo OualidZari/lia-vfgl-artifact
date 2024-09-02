@@ -40,9 +40,11 @@ function run_experiment() {
 export -f run_experiment
 export -f get_gpu_with_most_free_memory
 seeds=(42 12 36 15 11 99 04 09 98 10)
+# seeds=(36)
 fraction_data_gcn=(0.5)
 architectures=('gcn')
-datasets=('amazon_computer')
-label_defense_budgets=(0 0.05 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9)
+datasets=('amazon_computer' 'amazon_photo' 'Cora' 'Citeseer')
+label_defense_budgets=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9)
+# label_defense_budgets=(0.1 0.2)
 num_runs=5
 parallel --line-buffer -j ${num_runs} run_experiment ::: "${seeds[@]}" ::: "${fraction_data_gcn[@]}" ::: "${datasets[@]}" ::: "${architectures[@]}" ::: "${label_defense_budgets[@]}"

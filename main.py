@@ -38,6 +38,8 @@ def main():
     if args.label_defense and args.label_defense_budget > 0:
         new_labels = labels_defense(data.y, args.label_defense_budget)
         data.y = new_labels
+    else:
+        new_labels = None 
 
     # add here lapgraph
     if args.lapgraph and args.epsilon != -1:
@@ -212,8 +214,9 @@ def main():
         args.attack_methods = args.attack_methods.split(",")
         data_train, node_index_mapping = get_training_graph(train_mask, args)
         data_attack, node_index_mapping_attack = get_attacked_nodes_data(
-            features_mlp_adv if args.multi_party else features_mlp, train_mask, args
+            features_mlp_adv if args.multi_party else features_mlp, train_mask, args, new_labels
         )
+    
 
     attacks_done = {
         'features': False,

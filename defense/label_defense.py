@@ -23,7 +23,8 @@ def optimize_proportions(initial_proportions, budget, max_iter=10000):
     bounds = [(0, None) for _ in range(n)]
 
     # Initial guess (starting point)
-    initial_guess = np.array(initial_proportions)
+    initial_guess = initial_proportions
+    initial_guess = initial_guess / initial_guess.sum()  # Normalize to sum to 1
 
     # Define constraints in the form required by `scipy.optimize.minimize`
     constraints = [
@@ -41,17 +42,12 @@ def optimize_proportions(initial_proportions, budget, max_iter=10000):
         options={"maxiter": max_iter, "disp": True},
     )
 
-    # Print debugging information
-    print("Optimization Result:", result)
-
     if result.success:
         optimized_proportions = result.x
-        optimized_sum_of_squares = (
-            -result.fun
-        )  # Since we minimized the negative sum of squares
+        optimized_sum_of_squares = -result.fun  # Since we minimized the negative sum of squares
         return optimized_proportions, optimized_sum_of_squares
     else:
-        raise ValueError("Optimization failed: " + result.message)
+        return result
 
 
 from collections import Counter
@@ -158,20 +154,49 @@ def proportions_to_rounded_counts(proportions, total_nodes):
 
 
 def labels_defense(labels, budget):
-    # clalculate the class proportions
+    print("Labels Defense")
+    print("Budget:", budget)
+    
+    # Calculate the class proportions
     labels = labels.numpy()
     unique, counts = np.unique(labels, return_counts=True)
-    N = labels.size
-    alpha_c = counts / N
-    # optimize the proportions
+    N = len(labels)
+    alpha_c = counts.astype(np.float64) / N
+    
+    print("Initial Proportions:", alpha_c)
+    print("Type of initial proportions:", type(alpha_c))
+    print("Shape of alpha_c:", alpha_c.shape)
+    print("Sum of alpha_c:", np.sum(alpha_c))
+
+    # Create a copy of alpha_c to use as initial_proportions
+    initial_proportions = alpha_c.copy()
+
+    print("Shape of initial_proportions:", initial_proportions.shape)
+    print("Sum of initial_proportions:", np.sum(initial_proportions))
+
     try:
         optimized_proportions, optimized_sum_of_squares = optimize_proportions(
-            alpha_c, budget
+            initial_proportions, budget
         )
+        print("Optimization successful")
         print("Optimized Proportions:", optimized_proportions)
         print("Optimized Sum of Squares:", optimized_sum_of_squares)
-    except ValueError as e:
-        print(e)
+    except Exception as e:
+        print("Initial optimization failed:", str(e))
+        print("Resorting to rounding alpha_c and retrying optimization")
+        # Round to 8 decimal places and retry optimization
+        rounded_alpha_c = np.round(alpha_c, decimals=8)
+        try:
+            optimized_proportions, optimized_sum_of_squares = optimize_proportions(
+                rounded_alpha_c, budget
+            )
+            print("Optimization with rounded proportions successful")
+            print("Optimized Proportions:", optimized_proportions)
+            print("Optimized Sum of Squares:", optimized_sum_of_squares)
+        except Exception as e:
+            print("Optimization with rounded proportions also failed:", str(e))
+            raise RuntimeError("Both optimization attempts failed. Stopping the program.")
+
     # balance the labels
     new_labels = balance_labels(labels, optimized_proportions)
     return torch.tensor(new_labels)

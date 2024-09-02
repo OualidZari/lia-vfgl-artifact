@@ -113,14 +113,13 @@ def process_attack_data_online(gradients, forward_values, output_values,
     return attack_data
     
     
-def get_attacked_nodes_data(features_mlp, train_mask, args):
+def get_attacked_nodes_data(features_mlp, train_mask, args, new_labels=None):
 
     dataset, data, _, _, _ = load_data(args)
     edge_index_np = data.edge_index.cpu().numpy()
     indices = np.arange(data.num_nodes)
 
-    if args.label_defense and args.label_defense_budget > 0:
-        new_labels = labels_defense(data.y, args.label_defense_budget)
+    if new_labels is not None:
         data.y = new_labels
     if args.sampling_strategy == 'all_nodes':
         attacked_nodes = np.where(train_mask)[0]
