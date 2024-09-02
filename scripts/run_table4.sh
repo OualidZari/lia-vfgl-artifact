@@ -15,7 +15,7 @@ function run_experiment() {
         --perform_attack_all_methods --attack_all_nodes \
         --attack_methods 'labels,features,gradients,output_server,forward_values' \
         --local_logging \
-        --experiment_name "Table 4 results ${dataset}" \
+        --experiment_name "Table 4 results Testing attack times ${dataset}" \
         --attack_epochs [-1])
 }
 

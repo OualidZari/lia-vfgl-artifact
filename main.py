@@ -22,7 +22,7 @@ import pickle
 import os
 import csv
 from datetime import datetime
-
+import hashlib
 
 def main():
     args = get_args()
@@ -55,7 +55,8 @@ def main():
         test_mask = train_mask
 
     # Setup logging
-    run_id = datetime.now().strftime("%Y%m%d-%H%M%S") + f"_seed_{args.seed}_" + str(random.randint(0, 100))
+    config_hash = hash(json.dumps(vars(args), sort_keys=True))
+    run_id = datetime.now().strftime("%Y%m%d-%H%M%S") + f"_seed_{args.seed}_" + str(abs(config_hash) % 10000)
     log_dir = f"logs/{args.experiment_name}/{run_id}"
     os.makedirs(log_dir, exist_ok=True)
 
@@ -214,7 +215,15 @@ def main():
             features_mlp_adv if args.multi_party else features_mlp, train_mask, args
         )
 
-    labels_attack_done, features_attack_done = False, False
+    attacks_done = {
+        'features': False,
+        'gradients': False,
+        'labels': False,
+        'forward_values': False,
+        'output_server': False
+    }
+    first_epoch_attacks = ['features', 'gradients', 'labels']
+    final_epoch_attacks = ['forward_values', 'output_server']
     for epoch in tqdm(range(args.epochs)):
         if args.multi_party:
             gnn_output = gnn_model(features_gcn, data.edge_index)
@@ -313,7 +322,7 @@ def main():
             auc, fpr, tpr = calculate_auc(pos_sim, neg_sim, epoch)
         if args.perform_attack_all_methods:
             for attack_method in args.attack_methods:
-                if attack_method == "labels" and not labels_attack_done:
+                if attack_method == "labels" and not attacks_done['labels']:
                     attack_data = process_attack_data_online(
                         gradients=None,
                         forward_values=None,
@@ -348,8 +357,8 @@ def main():
                     if args.use_wandb:
                         wandb.log(attack_results, step=epoch)
 
-                    labels_attack_done = True
-                if attack_method == "features" and not features_attack_done:
+                    attacks_done['labels'] = True
+                if attack_method == "features" and not attacks_done['features']:
                     attack_data = process_attack_data_online(
                         gradients=None,
                         forward_values=None,
@@ -384,8 +393,8 @@ def main():
                     if args.use_wandb:
                         wandb.log(attack_results, step=epoch)
 
-                    features_attack_done = True
-                if attack_method == "gradients":
+                    attacks_done['features'] = True
+                if attack_method == "gradients" and not attacks_done['gradients'] and epoch == 0:
                     gradients = (
                         mlp_adv_model.gradient_list[epoch][
                             data_attack.attacked_nodes_mask
@@ -429,7 +438,8 @@ def main():
                     if args.use_wandb:
                         wandb.log(attack_results, step=epoch)
 
-                if attack_method == "forward_values":
+                    attacks_done['gradients'] = True
+                if attack_method == "forward_values" and not attacks_done['forward_values'] and epoch == args.epochs - 1:
                     forward_values = (
                         mlp_adv_output.clone().detach().cpu()
                         if args.multi_party
@@ -469,7 +479,8 @@ def main():
                     if args.use_wandb:
                         wandb.log(attack_results, step=epoch)
 
-                if attack_method == "output_server":
+                    attacks_done['forward_values'] = True
+                if attack_method == "output_server" and not attacks_done['output_server'] and epoch == args.epochs - 1:
                     output_values = final_output.clone().detach().cpu()
                     attack_data = process_attack_data_online(
                         gradients=None,
