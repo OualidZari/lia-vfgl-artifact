@@ -1,6 +1,6 @@
 # Link Inference Attack in Vertical Federated Graph Learning
 
-This repository contains the code and resources to reproduce the main results of the paper "Link Inference Attack in Vertical Federated Graph Learning".
+This repository contains the code and resources to reproduce the main results of the paper "Link Inference Attack in Vertical Federated Graph Learning" ACSAC2024.
 
 ## Requirements and Setup
 
